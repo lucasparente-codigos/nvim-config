@@ -51,12 +51,16 @@ function M.setup(handlers)
 
       -- Verifica instalacao
       local launcher_jar = vim.fn.glob(mason_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
-      if launcher_jar == "" then
-        logger.error(
-          string.format("JDTLS nao encontrado em %s. Execute :MasonInstall jdtls", mason_path),
-          true
-        )
-        return
+        if launcher_jar == "" then
+	   -- Tenta o caminho alternativo, que é mais comum em instalações recentes do Mason
+  	   launcher_jar = vim.fn.glob(mason_path .. "/org.eclipse.equinox.launcher_*.jar")
+	end
+	if launcher_jar == "" then
+ 	  logger.error(
+    	    string.format("JDTLS nao encontrado em %s. Execute :MasonInstall jdtls", mason_path),
+    	    true
+  	)
+  	return
       end
 
       logger.info(string.format("Iniciando JDTLS para workspace: %s", workspace_name))

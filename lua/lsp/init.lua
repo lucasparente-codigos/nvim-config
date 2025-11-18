@@ -6,10 +6,7 @@ local logger = require("utils.logger")
 local handlers = require("lsp.handlers")
 local lsp_utils = require("lsp.utils")
 
--- Inicializa handlers
 handlers.setup()
-
--- Configura comandos utilitarios
 lsp_utils.setup_commands()
 
 -- Mapeamento de filetypes para servidores
@@ -22,6 +19,7 @@ local ft_to_server = {
   javascriptreact = "ts_ls",
   html = "html",
   css = "cssls",
+  php = "intelephense",  -- ← ADICIONADO
 }
 
 -- Markers de root_dir por servidor
@@ -31,17 +29,16 @@ local server_markers = {
   ts_ls = { "package.json", "tsconfig.json", ".git" },
   html = { "package.json", ".git" },
   cssls = { "package.json", ".git" },
+  intelephense = { "composer.json", ".git", "index.php" },  -- ← ADICIONADO
 }
 
 -- Funcao para iniciar LSP generico
 local function start_lsp_server(bufnr, server_name)
-  -- Verifica se ja esta ativo
   if lsp_utils.is_lsp_active(bufnr, server_name) then
     logger.debug(string.format("LSP %s ja ativo no buffer %d", server_name, bufnr))
     return
   end
 
-  -- Verifica se o executavel existe
   if not lsp_utils.executable_exists(server_name) then
     logger.warn(
       string.format("Executavel '%s' nao encontrado. Instale via :MasonInstall %s", server_name, server_name),
@@ -50,20 +47,52 @@ local function start_lsp_server(bufnr, server_name)
     return
   end
 
-  -- Encontra root_dir
   local markers = server_markers[server_name] or { ".git" }
   local root_dir = lsp_utils.find_root_dir(bufnr, markers)
 
   logger.info(string.format("Iniciando LSP %s para buffer %d", server_name, bufnr))
 
-  -- Inicia LSP
-  local success, error_msg = pcall(vim.lsp.start, {
+  -- Configuracao especial para intelephense
+  local extra_config = {}
+  if server_name == "intelephense" then
+    extra_config = {
+      settings = {
+        intelephense = {
+          files = {
+            maxSize = 5000000,
+            associations = { "*.php", "*.phtml" },
+            exclude = {
+              "**/.git/**",
+              "**/.svn/**",
+              "**/.hg/**",
+              "**/CVS/**",
+              "**/.DS_Store/**",
+              "**/node_modules/**",
+              "**/bower_components/**",
+              "**/vendor/**/{Tests,tests}/**",
+            },
+          },
+          format = {
+            enable = true,
+            braces = "k&r",
+          },
+          environment = {
+            phpVersion = "8.2.0",  -- Ajuste conforme sua versao
+          },
+        },
+      },
+    }
+  end
+
+  local config = vim.tbl_deep_extend("force", {
     name = server_name,
     cmd = { server_name },
     root_dir = root_dir,
     capabilities = handlers.get_capabilities(),
     on_attach = handlers.on_attach,
-  })
+  }, extra_config)
+
+  local success, error_msg = pcall(vim.lsp.start, config)
 
   if not success then
     logger.error(string.format("Erro ao iniciar %s: %s", server_name, error_msg), true)
@@ -83,7 +112,7 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Configura JDTLS separadamente (tem configuracao especial)
+-- Configura JDTLS separadamente
 local ok, jdtls_config = pcall(require, "lsp.servers.jdtls")
 if ok then
   jdtls_config.setup(handlers)

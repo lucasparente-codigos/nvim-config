@@ -43,6 +43,7 @@ return {
           "html",
           "cssls",
           "jdtls",
+          "intelephense",  -- ← ADICIONADO
         },
         automatic_installation = true,
       })
