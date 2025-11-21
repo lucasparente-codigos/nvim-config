@@ -8,7 +8,7 @@ return {
     'hrsh7th/cmp-nvim-lsp',
     'hrsh7th/cmp-buffer',
     'hrsh7th/cmp-path',
-    'mfussenegger/nvim-jdtls',
+    -- 'mfussenegger/nvim-jdtls', -- Removido, deve ser dependência do JDTLS
   },
   config = function()
     local ok, cmp = pcall(require, 'cmp')

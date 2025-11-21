@@ -5,6 +5,7 @@
 return {
   {
     'williamboman/mason.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' }, -- Adicionado para ícones no UI
     config = function()
       local ok, mason = pcall(require, 'mason')
       if not ok then
@@ -25,28 +26,5 @@ return {
     end,
   },
 
-  {
-    'williamboman/mason-lspconfig.nvim',
-    dependencies = { 'williamboman/mason.nvim' },
-    config = function()
-      local ok, mason_lspconfig = pcall(require, 'mason-lspconfig')
-      if not ok then
-        vim.notify("Erro ao carregar Mason-LSPConfig", vim.log.levels.ERROR)
-        return
-      end
-
-      mason_lspconfig.setup({
-        ensure_installed = {
-          "gopls",
-          "pyright",
-          "ts_ls",
-          "html",
-          "cssls",
-          "jdtls",
-          "intelephense",  -- ← ADICIONADO
-        },
-        automatic_installation = true,
-      })
-    end,
-  },
+  -- O mason-lspconfig foi movido para o arquivo lsp.lua para melhor organização
 }

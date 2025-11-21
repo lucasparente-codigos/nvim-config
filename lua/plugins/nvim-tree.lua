@@ -4,6 +4,7 @@
 
 return {
   'nvim-tree/nvim-tree.lua',
+  dependencies = { 'nvim-tree/nvim-web-devicons' }, -- Adicionado para ícones
   config = function()
     local ok, nvim_tree = pcall(require, 'nvim-tree')
     if not ok then
@@ -15,7 +16,7 @@ return {
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
 
-    -- Configuracao de icones desabilitados
+    -- Configuracao de icones desabilitados (mantido o minimalismo)
     vim.g.nvim_tree_show_icons = {
       git = 0,
       folders = 0,
@@ -34,7 +35,7 @@ return {
       },
 
       renderer = {
-        -- Desabilita todos os icones
+        -- Desabilita todos os icones (mantendo o feeling minimalista)
         icons = {
           show = {
             file = false,

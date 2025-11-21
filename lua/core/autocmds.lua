@@ -16,16 +16,16 @@ autocmd("TextYankPost", {
   end,
 })
 
--- Remove espacos em branco ao salvar
-autocmd("BufWritePre", {
-  group = general,
-  pattern = "*",
-  callback = function()
-    local save_cursor = vim.fn.getpos(".")
-    vim.cmd([[%s/\s\+$//e]])
-    vim.fn.setpos(".", save_cursor)
-  end,
-})
+-- Remove espacos em branco ao salvar (REMOVIDO: Sugerido usar formatter LSP)
+-- autocmd("BufWritePre", {
+--   group = general,
+--   pattern = "*",
+--   callback = function()
+--     local save_cursor = vim.fn.getpos(".")
+--     vim.cmd([[%s/\s\+$//e]])
+--     vim.fn.setpos(".", save_cursor)
+--   end,
+-- })
 
 -- Restaura posicao do cursor
 autocmd("BufReadPost", {

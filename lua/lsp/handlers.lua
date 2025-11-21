@@ -35,8 +35,10 @@ function M.on_attach(client, bufnr)
 
   vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, bufopts)
   vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, bufopts)
+  
+  -- Formatação (usando vim.lsp.buf.format, que é mais idiomático)
   vim.keymap.set("n", "<leader>f", function()
-    vim.lsp.buf.format({ async = false })
+    vim.lsp.buf.format({ async = true }) -- Usando async para não bloquear
   end, bufopts)
 
   -- Destaque de referências
@@ -106,7 +108,7 @@ function M.setup_diagnostics()
   logger.debug("Diagnósticos configurados")
 end
 
--- Inicialização geral
+-- Inicialização geral (apenas diagnósticos)
 function M.setup()
   M.setup_diagnostics()
   logger.debug("Handlers LSP inicializados")

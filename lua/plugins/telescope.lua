@@ -4,7 +4,11 @@
 
 return {
   'nvim-telescope/telescope.nvim',
-  dependencies = { 'nvim-lua/plenary.nvim' },
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+    'nvim-tree/nvim-web-devicons', -- Adicionado para ícones
+    { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' }, -- Adicionado para performance
+  },
   config = function()
     local ok_telescope, telescope = pcall(require, 'telescope')
     if not ok_telescope then
@@ -33,13 +37,13 @@ return {
           '--glob=!.git/',
         },
 
-        -- Caracteres ASCII simples
+        -- Caracteres ASCII simples (mantido o minimalismo)
         prompt_prefix = '> ',
         selection_caret = '> ',
         entry_prefix = '  ',
         multi_icon = '+',
 
-        -- Bordas ASCII simples
+        -- Bordas ASCII simples (mantido o minimalismo)
         borderchars = { '-', '|', '-', '|', '+', '+', '+', '+' },
 
         -- Comportamento
@@ -129,9 +133,17 @@ return {
       },
 
       extensions = {
-        -- Extensoes futuras podem ser adicionadas aqui
+        fzf = {
+          fuzzy = true,
+          override_generic_sorter = true,
+          override_file_sorter = true,
+          case_mode = "smart_case",
+        },
       },
     })
+
+    -- Carrega a extensão fzf
+    telescope.load_extension("fzf")
 
     -- Keymaps globais
     local builtin_ok, builtin = pcall(require, 'telescope.builtin')
