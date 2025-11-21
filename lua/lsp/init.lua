@@ -19,7 +19,7 @@ local ft_to_server = {
   javascriptreact = "ts_ls",
   html = "html",
   css = "cssls",
-  php = "intelephense",  -- ← ADICIONADO
+  php = "intelephense",
 }
 
 -- Markers de root_dir por servidor
@@ -29,19 +29,19 @@ local server_markers = {
   ts_ls = { "package.json", "tsconfig.json", ".git" },
   html = { "package.json", ".git" },
   cssls = { "package.json", ".git" },
-  intelephense = { "composer.json", ".git", "index.php" },  -- ← ADICIONADO
+  intelephense = { "composer.json", ".git", "index.php" },
 }
 
--- Funcao para iniciar LSP generico
+-- Função para iniciar um LSP
 local function start_lsp_server(bufnr, server_name)
   if lsp_utils.is_lsp_active(bufnr, server_name) then
-    logger.debug(string.format("LSP %s ja ativo no buffer %d", server_name, bufnr))
+    logger.debug(string.format("LSP %s já ativo no buffer %d", server_name, bufnr))
     return
   end
 
-  if not lsp_utils.executable_exists(server_name) then
+  if not lsp_utils.executable_exists(server_name) and server_name ~= "ts_ls" then
     logger.warn(
-      string.format("Executavel '%s' nao encontrado. Instale via :MasonInstall %s", server_name, server_name),
+      string.format("Executável '%s' não encontrado. Instale via :MasonInstall %s", server_name, server_name),
       true
     )
     return
@@ -52,10 +52,17 @@ local function start_lsp_server(bufnr, server_name)
 
   logger.info(string.format("Iniciando LSP %s para buffer %d", server_name, bufnr))
 
-  -- Configuracao especial para intelephense
+  -- Config extra para cada servidor
   local extra_config = {}
+
+  -- Correção especial para ts_ls (TypeScript)
+  if server_name == "ts_ls" then
+    extra_config.cmd = { "typescript-language-server", "--stdio" }
+  end
+
+  -- Configuração custom para Intelephense
   if server_name == "intelephense" then
-    extra_config = {
+    extra_config = vim.tbl_deep_extend("force", extra_config, {
       settings = {
         intelephense = {
           files = {
@@ -77,16 +84,17 @@ local function start_lsp_server(bufnr, server_name)
             braces = "k&r",
           },
           environment = {
-            phpVersion = "8.2.0",  -- Ajuste conforme sua versao
+            phpVersion = "8.2.0",
           },
         },
       },
-    }
+    })
   end
 
+  -- Config final
   local config = vim.tbl_deep_extend("force", {
     name = server_name,
-    cmd = { server_name },
+    cmd = { server_name }, -- sobrescrito por extra_config.cmd quando necessário
     root_dir = root_dir,
     capabilities = handlers.get_capabilities(),
     on_attach = handlers.on_attach,
@@ -99,7 +107,7 @@ local function start_lsp_server(bufnr, server_name)
   end
 end
 
--- Auto-comando para iniciar LSP servers
+-- Auto comando para iniciar LSP automaticamente
 vim.api.nvim_create_autocmd("FileType", {
   pattern = vim.tbl_keys(ft_to_server),
   callback = function(args)
@@ -117,7 +125,7 @@ local ok, jdtls_config = pcall(require, "lsp.servers.jdtls")
 if ok then
   jdtls_config.setup(handlers)
 else
-  logger.warn("Configuracao JDTLS nao encontrada")
+  logger.warn("Configuração JDTLS não encontrada")
 end
 
 logger.info("LSP inicializado")
