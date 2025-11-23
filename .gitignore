@@ -1,0 +1,14 @@
+# Arquivos de cache e swap do Neovim
+**/*.swp
+**/*.swo
+**/*.bak
+
+# Diretórios de dados e cache do Neovim
+/data/
+/cache/
+
+# Plugins instalados pelo lazy.nvim
+/lazy/
+
+# Arquivos de log
+**/*.log
